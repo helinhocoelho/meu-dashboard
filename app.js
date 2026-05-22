@@ -85,13 +85,11 @@ async function carregarClientes() {
 
   data.forEach((c) => {
     clientesDiv.innerHTML += `
-      <div style="border:1px solid #ccc; margin:10px; padding:10px">
-
-        <h3>${c.nome}</h3>
-        <p>${c.projeto}</p>
-        <p>${c.status}</p>
-
-      </div>
-    `;
+  <div style="border:1px solid #ccc; margin:10px; padding:10px">
+    <h3>${c.nome}</h3>
+    <p>${c.email}</p>
+    <p>${c.status}</p>
+  </div>
+`;
   });
 }
