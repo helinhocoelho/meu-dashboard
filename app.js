@@ -7,17 +7,23 @@ const supabaseKey = "sb_publishable_wFCLK5zs-_TqRFcbuwGBhg_gs_LiZHm";
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const authContainer = document.getElementById("auth");
-const clientesContainer = document.getElementById("clientes");
-
+// ELEMENTOS
+const loginBtn = document.getElementById("loginBtn");
 const emailInput = document.getElementById("email");
 const senhaInput = document.getElementById("senha");
-const loginBtn = document.getElementById("loginBtn");
 
-// ----------------------------
+const authDiv = document.getElementById("auth");
+const clientesDiv = document.getElementById("clientes");
+
+// DEBUG
+console.log("JS carregado");
+
+// ----------------------
 // LOGIN
-// ----------------------------
+// ----------------------
 loginBtn.addEventListener("click", async () => {
+  console.log("Botão clicado");
+
   const email = emailInput.value;
   const password = senhaInput.value;
 
@@ -26,60 +32,58 @@ loginBtn.addEventListener("click", async () => {
     password,
   });
 
+  console.log("DATA:", data);
+  console.log("ERROR:", error);
+
   if (error) {
-    alert("Erro no login: " + error.message);
+    alert("Erro login: " + error.message);
     return;
   }
 
-  console.log("Usuário logado:", data.user);
+  authDiv.style.display = "none";
 
-  // esconder login
-  authContainer.style.display = "none";
-
-  // carregar dados
   carregarClientes();
 });
 
-// ----------------------------
-// VERIFICAR SESSÃO AO CARREGAR
-// ----------------------------
+// ----------------------
+// SESSÃO AUTOMÁTICA
+// ----------------------
 async function verificarSessao() {
   const { data } = await supabase.auth.getSession();
 
   if (data.session) {
-    console.log("Sessão ativa:", data.session.user);
+    console.log("Sessão ativa");
 
-    authContainer.style.display = "none";
+    authDiv.style.display = "none";
+
     carregarClientes();
   }
 }
 
 verificarSessao();
 
-// ----------------------------
-// CARREGAR CLIENTES (PROTEGIDO POR RLS)
-// ----------------------------
+// ----------------------
+// CARREGAR CLIENTES
+// ----------------------
 async function carregarClientes() {
-  clientesContainer.innerHTML = "Carregando...";
+  clientesDiv.innerHTML = "Carregando...";
 
   const { data, error } = await supabase.from("clientes").select("*");
 
   if (error) {
-    console.log("Erro ao buscar clientes:", error.message);
+    console.log("Erro clientes:", error.message);
     return;
   }
 
-  clientesContainer.innerHTML = "";
+  clientesDiv.innerHTML = "";
 
-  data.forEach((cliente) => {
-    clientesContainer.innerHTML += `
-      <div class="card">
+  data.forEach((c) => {
+    clientesDiv.innerHTML += `
+      <div style="border:1px solid #ccc; margin:10px; padding:10px">
 
-        <h2>${cliente.nome}</h2>
-
-        <p><strong>Projeto:</strong> ${cliente.projeto}</p>
-
-        <p><strong>Status:</strong> ${cliente.status}</p>
+        <h3>${c.nome}</h3>
+        <p>${c.projeto}</p>
+        <p>${c.status}</p>
 
       </div>
     `;
