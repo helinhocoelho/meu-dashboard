@@ -15,15 +15,12 @@ const senhaInput = document.getElementById("senha");
 const authDiv = document.getElementById("auth");
 const clientesDiv = document.getElementById("clientes");
 
-// DEBUG
 console.log("JS carregado");
 
 // ----------------------
 // LOGIN
 // ----------------------
 loginBtn.addEventListener("click", async () => {
-  console.log("Botão clicado");
-
   const email = emailInput.value;
   const password = senhaInput.value;
 
@@ -32,38 +29,42 @@ loginBtn.addEventListener("click", async () => {
     password,
   });
 
-  console.log("DATA:", data);
-  console.log("ERROR:", error);
-
   if (error) {
     alert("Erro login: " + error.message);
     return;
   }
 
-  authDiv.style.display = "none";
+  console.log("LOGADO:", data.user);
 
-  carregarClientes();
+  await iniciarApp();
 });
 
 // ----------------------
-// SESSÃO AUTOMÁTICA
+// VERIFICA SESSÃO AO ABRIR
 // ----------------------
-async function verificarSessao() {
+document.addEventListener("DOMContentLoaded", iniciarApp);
+
+// ----------------------
+// INICIALIZAÇÃO CENTRAL
+// ----------------------
+async function iniciarApp() {
   const { data } = await supabase.auth.getSession();
 
   if (data.session) {
-    console.log("Sessão ativa");
+    console.log("Sessão ativa:", data.session.user);
 
     authDiv.style.display = "none";
 
-    carregarClientes();
+    await carregarClientes();
+  } else {
+    console.log("Sem sessão");
+
+    authDiv.style.display = "block";
   }
 }
 
-verificarSessao();
-
 // ----------------------
-// CARREGAR CLIENTES
+// CARREGAR CLIENTES (RLS CONTROLA TUDO)
 // ----------------------
 async function carregarClientes() {
   clientesDiv.innerHTML = "Carregando...";
@@ -72,6 +73,11 @@ async function carregarClientes() {
 
   if (error) {
     console.log("Erro clientes:", error.message);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    clientesDiv.innerHTML = "<p>Nenhum dado encontrado.</p>";
     return;
   }
 
